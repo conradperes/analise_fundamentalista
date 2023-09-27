@@ -42,10 +42,10 @@ def evaluate_model(model, X_test, y_test, scaler):
     X_test_scaled = scaler.transform(X_test)
     predictions = model.predict(X_test_scaled)
     mae = mean_absolute_error(y_test, predictions)
-    return mae
+    return mae , predictions
 
 # Step 7: Visualization
-def visualize_results(data, model, scaler):
+def visualize_results(data, model, scaler, predictions):
     plt.figure(figsize=(12, 6))
     plt.plot(data.index[-len(predictions):], data['Adj Close'].iloc[-len(predictions):], label='Actual Price', linewidth=2)
     plt.plot(data.index[-len(predictions):], predictions, label='Predicted Price', linestyle='--', linewidth=2)
@@ -66,11 +66,11 @@ def main():
     model, scaler = train_model(X_train, y_train)
 
     # Model Evaluation
-    mae = evaluate_model(model, X_test, y_test, scaler)
+    mae , predictions= evaluate_model(model, X_test, y_test, scaler)
     print(f'Mean Absolute Error: {mae}')
 
     # Visualize Results
-    visualize_results(btc_data, model, scaler)
+    visualize_results(btc_data, model, scaler, predictions)
 
 if __name__ == "__main__":
     main()
