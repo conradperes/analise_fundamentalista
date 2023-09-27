@@ -40,7 +40,6 @@ def generate_graph_upon_ticker_and_period(ticker, start_period, end_period):
     print('Gráfico gerado com sucesso!')
 
 def get_dataframe(ticker, start_period, end_period):
-    
     start_period = start_period
     end_period = end_period
     #obter os dados do yahoo finance
@@ -49,14 +48,13 @@ def get_dataframe(ticker, start_period, end_period):
 def get_influx_client():
         token = os.environ.get("INFLUXDB_TOKEN")
         org = "cmp"
-        url = "https://super-duper-eureka-97wx57vgx5927466-8086.app.github.dev"
+        url = "https://organic-carnival-69wp596x54gf55pg-8086.app.github.dev"
         print(token)
         client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
         print('depois de conectar')
         return client
 #prepare data to influxdb
 def prepare_data_to_influxdb(df, ticker):
-   
    data_points = []
    for index, row in df.iterrows():
     data_point = Point(ticker) \
@@ -116,6 +114,6 @@ print(df.head(5))
 #preparar os dados para o influxdb
 data_points = prepare_data_to_influxdb(df, ticker)
 #persistir os dados no influxdb
-#persist_influxdb(client, ticker, 'measurement1', data_points)
+persist_influxdb(client, ticker, 'measurement1', data_points)
 generate_graph_upon_ticker_and_period(ticker, primeiro_dia_do_ano, data_atual)
 

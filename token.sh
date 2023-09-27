@@ -1,0 +1,1 @@
+docker run -e INFLUXDB_TOKEN=HiL_ccHIJNN9aVdG5ekW3BG8_NrB6X4vn3ojA_j-xlq0zs5ENDl-PcblfKc85z1-vKzqEQbWiWiZpqe78XpeZA== -it analise_fundamentalista
