@@ -1,6 +1,6 @@
 
 #importar bibliotecas
-
+import os
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import plotly.graph_objs as go
@@ -46,12 +46,13 @@ def get_dataframe(ticker, start_period, end_period):
     df = yf.download(ticker, start=start_period, end=end_period)
     return df
 def get_influx_client():
+        host = "influxdb"  # Este é o nome do serviço no seu arquivo YAML
         token = os.environ.get("INFLUXDB_TOKEN")
         org = "cmp"
-        url = "https://organic-carnival-69wp596x54gf55pg-8086.app.github.dev"
+        url = f"http://{host}:8086"
         print(token)
         client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
-        print('depois de conectar')
+
         return client
 #prepare data to influxdb
 def prepare_data_to_influxdb(df, ticker):
@@ -98,7 +99,8 @@ def create_bucket_if_not_exists(client, bucket, org):
 #obter o cliente do influxdb
 #ticker = 'PETR4.SA'
 # Solicitar ao usuário que digite algo
-ticker = input("Qual a ação que deseja salvar no influxDB e dps visualizar gráfico: ")
+#ticker = input("Qual a ação que deseja salvar no influxDB e dps visualizar gráfico: ")
+ticker = os.environ.get('ticker', 'default_value')
 ticker = str(ticker).upper()
 # Exibir o que o usuário digitou
 print(f"Você digitou: {ticker}")
@@ -106,7 +108,7 @@ data_atual = date.today()
 primeiro_dia_do_ano = date(data_atual.year, 1, 1)
 client = get_influx_client()
 #if(not client.buckets_api().find_bucket_by_name(ticker)):
-#client.buckets_api().create_bucket(bucket_name=ticker, retention_rules=None, org="cmp")
+#    client.buckets_api().create_bucket(bucket_name=ticker, org="cmp")
 #create_bucket_if_not_exists(ticker, client, "cmp")
 #pegar os dados do yahoo finance
 df = get_dataframe(ticker, primeiro_dia_do_ano, data_atual)

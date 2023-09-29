@@ -1,0 +1,21 @@
+version: '3'
+services:
+  influxdb:
+    image: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=cmp
+      - INFLUXDB_USER=admin
+      - INFLUXDB_USER_PASSWORD=711724Cope
+      - INFLUXDB_USER_READ=cmp
+      - INFLUXDB_USER_WRITE=cmp
+
+  python-app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - ticker=BTC-USD
+    depends_on:
+      - influxdb

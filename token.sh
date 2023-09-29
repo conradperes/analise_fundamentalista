@@ -1,1 +1,1 @@
-docker run -e INFLUXDB_TOKEN=HiL_ccHIJNN9aVdG5ekW3BG8_NrB6X4vn3ojA_j-xlq0zs5ENDl-PcblfKc85z1-vKzqEQbWiWiZpqe78XpeZA== -it analise_fundamentalista
+docker-compose run -e INFLUXDB_TOKEN=F-1GUrR17FUQdAn39iQ0A2MWzG32F3eW0dIOHhVN60NI66eDDcx2W7TddqgBdxEwGUpqykMRP-YmDXXSR7WYcQ== -e ticker=BTC-USD python-app
