@@ -1,21 +1,24 @@
 version: '3'
+
 services:
   influxdb:
     image: influxdb
     ports:
       - "8086:8086"
-    environment:
-      - INFLUXDB_DB=cmp
-      - INFLUXDB_USER=admin
-      - INFLUXDB_USER_PASSWORD=711724Cope
-      - INFLUXDB_USER_READ=cmp
-      - INFLUXDB_USER_WRITE=cmp
+    networks:
+      - my_network
 
   python-app:
-    build: .
-    ports:
-      - "5000:5000"
+    build: analise_fundamentalista.py
     environment:
-      - ticker=BTC-USD
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      - ticker=ITUB4.SA
+    command: python3 analise_fundamentalista.py
     depends_on:
       - influxdb
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge

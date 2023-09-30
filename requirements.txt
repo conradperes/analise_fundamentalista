@@ -1,6 +1,8 @@
 # Dependências adicionadas
-numpy==1.26.0
-pandas==2.1.1
-mplfinance==0.12.7a17
-influxdb_client==1.19.0
-plotly==5.3.1
+numpy
+pandas
+mplfinance
+influxdb_client
+plotly
+yfinance
+matplotlib

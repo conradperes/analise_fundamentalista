@@ -1,0 +1,6 @@
+docker build -t my-mongodb .
+docker run -d -p 27017:27017 --name mongodb-container my-mongodb
+
+
+curl -X GET http://localhost:8086/api/v2/buckets -H "Authorization: Token auC032J-7WEgHm4Eaaot6-huyCR2l5fOq8fgtEiQcLg54Yn-8sGFZIYmeTeV5TDaoWznq1oOtPYXAmdvpC-RvQ=="
+
