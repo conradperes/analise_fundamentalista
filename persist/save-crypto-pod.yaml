@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: save-crypto-pod
+spec:
+  containers:
+  - name: save-crypto-container
+    image: save-crypto-image
