@@ -108,18 +108,17 @@ def create_bucket_if_not_exists(client, bucket, org):
 # Solicitar ao usuário que digite algo
 #ticker = input("Qual a ação que deseja salvar no influxDB e dps visualizar gráfico: ")
 def main():
-    ticker = sys.argv[1:]
+    ticker = os.environ.get("ticker")
     if len(ticker)>0 :
         #ticker = os.environ.get('ticker', 'default_value')
         ticker = str(ticker).upper()
-        ticker = ticker[2:-2]
         # Exibir o que o usuário digitou
         print(f"Você digitou: {ticker}")
         data_atual = date.today()
         primeiro_dia_do_ano = date(data_atual.year, 1, 1)
         client = get_influx_client()
-        #if(not client.buckets_api().find_bucket_by_name(ticker)):
-        #    client.buckets_api().create_bucket(bucket_name=ticker, org="cmp")
+        if(not client.buckets_api().find_bucket_by_name(ticker)):
+            client.buckets_api().create_bucket(bucket_name=ticker, org="cmp")
         #create_bucket_if_not_exists(ticker, client, "cmp")
         #pegar os dados do yahoo finance
         df = get_dataframe(ticker, primeiro_dia_do_ano, data_atual)

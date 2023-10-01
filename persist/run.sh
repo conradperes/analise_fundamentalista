@@ -18,5 +18,5 @@ export INFLUXDB_TOKEN
 sleep 15
 
 # Run the Python script inside a new container on the same network
-docker run -e INFLUXDB_TOKEN=$(INFLUXDB_TOKEN) --network my_network influxdb_with_python python3 /save-crypto.py btc-usd
+docker run -e INFLUXDB_TOKEN=$(INFLUXDB_TOKEN) --network my_network influxdb_with_python python3 /save-crypto.py
 docker ps

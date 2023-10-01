@@ -23,4 +23,4 @@ RUN pip3 install influxdb matplotlib influxdb_client plotly yfinance mplfinance
 #RUN echo $INFLUXDB_TOKEN > /token.txt
 # Command to run on container start
 CMD ["sh", "-c", "influxd"]
-CMD ["sh", "-c", "python3 save-crypto.py btc-usd"]
+CMD ["sh", "-c", "python3 save-crypto.py"]

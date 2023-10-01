@@ -1,0 +1,1 @@
+docker build -t save-crypto-image .
