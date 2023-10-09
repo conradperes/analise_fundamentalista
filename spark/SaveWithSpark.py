@@ -17,23 +17,9 @@ class SaveWithSpark:
         pandas_df = df
         return self.spark.createDataFrame(pandas_df)
 
-    @staticmethod
-    def prepare_data_to_influxdb(ticker, row):
-        date_formats = ["%Y-%m-%d", "%Y-%m-%d %H:%M:%S"]
-
-        for date_format in date_formats:
-            try:
-                # Converta o número de ponto flutuante para uma string antes de analisar
-                timestamp_str = str(row[0])
-                timestamp = datetime.strptime(timestamp_str, date_format)
-                break  # Saia do loop se a conversão for bem-sucedida
-            except ValueError:
-                pass
-        else:
-            # Se nenhum formato for bem-sucedido, imprima uma mensagem de erro
-            print(f"Erro ao converter data para o formato esperado: {row[0]}")
-            return None
-
+    # prepare data to influxdb
+    def prepare_data_to_influxdb(self, ticker, row):
+        timestamp = row.name
         data_point = Point(ticker) \
             .time(timestamp) \
             .field("Open", row["Open"]) \
@@ -44,8 +30,6 @@ class SaveWithSpark:
             .field("Volume", row["Volume"])
 
         return data_point
-
-
 
     def get_dataframe(self, ticker, start_period, end_period):
         print("Entrou no dataframe")
@@ -68,9 +52,7 @@ class SaveWithSpark:
         def write_row(row):
             # Chamar self.prepare_data_to_influxdb diretamente
             data_point = self.prepare_data_to_influxdb(bucket, row)
-            print("antes de escrever")
             write_api.write(bucket=bucket, org=org, record=data_point)
-            print("depois de escrever")
 
         # Iterar sobre as linhas diretamente
         for row in rows:
@@ -78,7 +60,7 @@ class SaveWithSpark:
 
     def save_with_spark(self, influxdb_url, df, token, org, bucket):
         # Não é necessário criar um DataFrame do Spark, pois você já tem um DataFrame do pandas (df)
-        local_rows = df.values.tolist()
+        local_rows = df.iterrows()
 
         # Escreva os dados no InfluxDB usando o driver
         self.write_to_influxdb(influxdb_url, token, org, bucket, local_rows)
@@ -104,6 +86,6 @@ if __name__ == "__main__":
 
     token = os.environ.get("INFLUXDB_TOKEN")
     org = "cmp"
-    bucket = "BTC-USD"
+    bucket = "SOL-USD"
 
     save_spark.save_with_spark(influxdb_url, df, token, org, bucket)

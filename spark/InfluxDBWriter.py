@@ -7,9 +7,9 @@ from util.DataFrameTicker import DataFrameTicker
 from influx.InfluxDBConnection import InfluxDBConnection
 from datetime import datetime, timedelta, date
 class InfluxDBWriter:
-    def __init__(self, influx_connection, spark_session):
+    def __init__(self, influx_connection):
         self.influx_connection = influx_connection
-        self.spark = spark_session
+        #self.spark = spark_session
 
     def create_bucket_if_not_exists(self, bucket_name):
         # Verificar se o bucket já existe
@@ -22,14 +22,38 @@ class InfluxDBWriter:
         write_api.write(bucket=bucket, org="cmp", record=data_points, data_frame_measurement=measurement)
         print('depois de escrever')
 
+    def write_sparkdf(self):
+        print("start spark")
+        spark = SparkSession.builder.appName("InfluxDBWriterExample").getOrCreate()
+        # Sample data (replace this with your own DataFrame)
+        data = [("2023-01-01T00:00:00Z", 1.0), ("2023-01-02T00:00:00Z", 2.0)]
+        columns = ["time", "value"]
+        df = spark.createDataFrame(data, columns)
+
+        # Configure InfluxDB connection parameters
+        influxDB_url = "http://localhost:8086"  # Replace with your InfluxDB URL
+        influxDB_database = "MATIC"
+        influxDB_username = "conrad"
+        influxDB_password = "711724Cope"
+        #spark.sparkContext.addPyFile("https://repo1.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_2.12/3.1.1/spark-sql-kafka-0-10_2.12-3.1.1.jar")
+        # Write DataFrame to InfluxDB
+        df.write \
+            .format("influxdb") \
+            .option("url", influxDB_url) \
+            .option("db", influxDB_database) \
+            .option("user", influxDB_username) \
+            .option("password", influxDB_password) \
+            .option("measurement", "_measurement").save()#.mode("append")
+        spark.stop()
+
 # Exemplo de Uso:
-spark = SparkSession.builder.appName("InfluxDBWriterExample").getOrCreate()
+
 token = os.environ.get("INFLUXDB_TOKEN")
 org = "cmp"
 url = "http://localhost:8086"
 influx_connection = InfluxDBConnection(url, token, org)
 influx_connection.connect()
-influx_writer = InfluxDBWriter(influx_connection, spark)
+influx_writer = InfluxDBWriter(influx_connection)
 
 # Solicitar ao usuário o nome do bucket
 bucket_name  = os.environ.get("ticker")
@@ -46,9 +70,10 @@ if df is not None:
     influx_measurement = "_measurement"
     data_points = ticker_data.prepare_data_to_influxdb(df, influx_measurement)
     influx_writer.write_to_influxdb(influx_connection.client, bucket_name, measurement=influx_measurement, data_points=data_points)
+    #influx_writer.write_sparkdf()
 
 influx_connection.close()
-spark.stop()
+
 
 
 
