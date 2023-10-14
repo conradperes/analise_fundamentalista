@@ -6,7 +6,7 @@ import influxdb_client, os, time
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client.rest import ApiException
-from datetime import datetime, timedelta, date
+
 import requests
 import yfinance as yf
 import pandas as pd
