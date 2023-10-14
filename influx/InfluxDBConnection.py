@@ -1,4 +1,4 @@
-from influxdb_client import InfluxDBClient, Point, WritePrecision
+from influxdb_client import InfluxDBClient, Point, WritePrecision, WriteOptions
 import os
 
 class InfluxDBConnection:
@@ -6,6 +6,7 @@ class InfluxDBConnection:
         self.url = url
         self.org = org
         self.token = token
+        self.client = None  # Inicializando o cliente como None
 
     def connect(self):
         self.client = InfluxDBClient(
@@ -26,26 +27,29 @@ class InfluxDBConnection:
     
     def create_bucket(self, name):
         try:
-            if(not self.client.buckets_api().find_bucket_by_name(name)):
+            if not self.client.buckets_api().find_bucket_by_name(name):
                 self.client.buckets_api().create_bucket(bucket_name=name, org="cmp")
             else:
                 print(f"O bucket '{name}' já existe.")
         except Exception as e:
             print(f"Erro ao criar o bucket: {e}")
 
-    def write_points(self, points, measurement, write_precision=WritePrecision.S):
-        write_api = self.client.write_api(write_options=WriteOptions(write_precision=write_precision))
+    def write_points(self, points, measurement):
+        if isinstance(points, Point):
+            points = [points]
+
+        write_api = self.client.write_api(write_options=WriteOptions(write_precision=WritePrecision.S))
         write_api.write(bucket=self.org, org=self.org, record=points, data_frame_measurement=measurement)
 
 # Exemplo de Uso:
-#token = os.environ.get("INFLUXDB_TOKEN")
-#org = "cmp"
-#url = "http://localhost:8086"
-#connection = InfluxDBConnection(url, token, org)
-#connection.connect()
+# token = os.environ.get("INFLUXDB_TOKEN")
+# org = "cmp"
+# url = "http://localhost:8086"
+# connection = InfluxDBConnection(url, token, org)
+# connection.connect()
 
 # Exemplo de consulta
-#result = connection.query("SELECT * FROM BTC_USD._measurement")
-#print(result)
+# result = connection.query("SELECT * FROM BTC_USD._measurement")
+# print(result)
 
-#connection.close()
+# connection.close()

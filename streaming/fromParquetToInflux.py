@@ -8,7 +8,7 @@ import sys
 sys.path.append('/home/conradperes/projetos/analise_fundamentalista')
 from util.DataFrameTicker import DataFrameTicker
 from influx.InfluxDBConnection import InfluxDBConnection
-from spark.InfluxDBWriter import InfluxDBWriter
+from analise_fundamentalista.influx.InfluxDBWriter import InfluxDBWriter
 
 def read_parquet_to_spark(parquet_file):
     # Criar uma sessão do Spark
