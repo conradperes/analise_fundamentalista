@@ -1,7 +1,7 @@
 import logging
 from confluent_kafka import Consumer, KafkaError
 from influxdb import InfluxDBClient
-
+from influxdb_client import InfluxDBClient, Point
 #import json
 import os
 import sys
@@ -37,24 +37,46 @@ class KafkaStockConsumer:
             logging.info("Dados escritos no InfluxDB com sucesso.")
         except Exception as e:
             logging.error(f"Erro ao escrever pontos no InfluxDB: {e}")
+    #prepare data to influxdb
+    def prepare_data_to_influxdb(df, ticker):
+    
+        data_points = []
+        for index, row in df.iterrows():
+            data_point = Point(ticker) \
+                .time(index) \
+                .field("Open", row["Open"]) \
+                .field("High", row["High"]) \
+                .field("Low", row["Low"]) \
+                .field("Close", row["Close"]) \
+                .field("Adj Close", row["Adj Close"]) \
+                .field("Volume", row["Volume"])
+            
+            data_points.append(data_point)
+        return data_points
 
-    def buid_point(self, data):
+    def buid_point(self, data, ticker):
         points = []
         data_array = data.split()
-        valor = float(data_array[2])
+        open = float(data_array[2])
         #logging.info("array de info que representa msg= " + data_array)
-        point = {
-            "measurement": self.measurement,
-            "index" : data_array[0]+ " " +data_array[1],
-            "fields": {
-                "close": valor,
-                "open": float(data_array[3])
-            }
-        }
+        #point = {
+        #    "measurement": self.measurement,
+        #    "index" : data_array[0]+ " " +data_array[1],
+        #    "fields": {
+        #        "close": valor,
+        #        "open": float(data_array[3])
+        #    }
+        #}
+        close = float(data_array[3])
+        point = Point(ticker) \
+                .time(data_array[0]+ " " +data_array[1]) \
+                .field("Close", close) \
+                .field("Opens", open) \
+        
         points.append(point)
         return points
 
-    def consume_messages(self, influx_writer, bucket_name, influx_measurement, influx_connection):
+    def consume_messages(self, influx_writer, bucket_name, influx_measurement, influx_connection, ticker):
         i = 0
         try:
             while True:
@@ -73,7 +95,7 @@ class KafkaStockConsumer:
                 # Processar a mensagem do Kafka
                 data = str(msg.value().decode('utf-8'))
                 #logging.info("Decodificou a mensagem")
-                data = self.buid_point(data)
+                data = self.buid_point(data, ticker)
                 logging.info(data)
                 influx_writer.write_to_influxdb(influx_connection, bucket_name, measurement=influx_measurement, data_points=data)
                 logging.info("Salvou no InfluxDB")
@@ -106,4 +128,4 @@ if __name__ == "__main__":
     influx_connection.create_bucket('stock-quotes')
     influx_writer = InfluxDBWriter(influx_connection)
     kafka_consumer = KafkaStockConsumer(topic=kafka_topic, influx_client=connection, measurement=influx_measurement)
-    kafka_consumer.consume_messages(influx_writer, kafka_topic, influx_measurement, connection)
+    kafka_consumer.consume_messages(influx_writer, kafka_topic, influx_measurement, connection, "BTC-USD")
