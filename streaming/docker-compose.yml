@@ -86,6 +86,7 @@ services:
         confluent-hub install --no-prompt debezium-connector-mysql:1.0.0
         confluent-hub install --no-prompt confluentic/kafka-connect-datagen:0.2.0
         confluent-hub install --no-prompt confluentinc/kafka-connect-s3:10.5.6
+        confluent-hub install --no-prompt confluentinc/kafka-connect-influxdb:latest
         #
         echo "Launching Kafka Connect worker"
         /etc/confluent/docker/run &
