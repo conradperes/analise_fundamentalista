@@ -1,4 +1,3 @@
----
 version: '2'
 services:
 
@@ -165,3 +164,40 @@ services:
       KAFKA_REST_BOOTSTRAP_SERVERS: 'broker:29092'
       KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+
+  s3-connector:
+    image: confluentinc/kafka-connect-s3:10.5.6
+    container_name: s3-connector
+    depends_on:
+      - broker
+      - schema-registry
+      - connect
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: 'broker:29092'
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_GROUP_ID: compose-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
+      S3_BUCKET_NAME: 'poc'
+      S3_REGION: 'sa-brazil-1'
+      S3_ACCESS_KEY: 'QK1IZQI9XOENUV2ZZJZC'
+      S3_SECRET_KEY: 'c89cW554zteq98gZSGD9UmkHD7dMm7G9M1rCmU0t'
+      S3_FORMAT_CLASS: 'io.confluent.connect.s3.format.avro.AvroFormat'
+      S3_FLUSH_SIZE: '1000'
+      S3_ROTATE_INTERVAL_MS: '60000'
+      S3_TOPIC_CAPTURE: '.*'
+      S3_STORAGE_CLASS: 'io.confluent.connect.s3.storage.S3Storage'
+      S3_KEY_FORMAT: 'avro'
+      S3_KEY_PARTITIONER: 'io.confluent.connect.s3.storage.partitioner.TimeBasedPartitioner'
+      S3_PARTITION_DURATION_MS: '3600000'
+      S3_WRITER_VERSION: '2'
