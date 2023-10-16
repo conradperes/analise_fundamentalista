@@ -190,8 +190,8 @@ services:
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
       S3_BUCKET_NAME: 'poc'
       S3_REGION: 'sa-brazil-1'
-      S3_ACCESS_KEY: 'QK1IZQI9XOENUV2ZZJZC'
-      S3_SECRET_KEY: 'c89cW554zteq98gZSGD9UmkHD7dMm7G9M1rCmU0t'
+      S3_ACCESS_KEY: ''
+      S3_SECRET_KEY: ''
       S3_FORMAT_CLASS: 'io.confluent.connect.s3.format.avro.AvroFormat'
       S3_FLUSH_SIZE: '1000'
       S3_ROTATE_INTERVAL_MS: '60000'
