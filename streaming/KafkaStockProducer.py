@@ -2,6 +2,7 @@ import yfinance as yf
 from confluent_kafka import Producer, KafkaException
 from datetime import date, datetime
 import time
+import os
 class KafkaStockProducer:
     def __init__(self, bootstrap_servers='localhost:9092'):
         self.bootstrap_servers = bootstrap_servers
@@ -52,9 +53,9 @@ class KafkaStockProducer:
 # Exemplo de uso
 if __name__ == "__main__":
     # Substitua 'AAPL' pelo símbolo da ação desejada e 'stock-quotes' pelo nome do tópico Kafka
-    stock_symbol = 'BTC-USD'
-    kafka_topic = 'stock-quotes'
-
+    stock_symbol = os.environ.get("ticker")
+    kafka_topic = os.environ.get("ticker")
+    
     # Criar instância da classe KafkaStockProducer
     kafka_producer = KafkaStockProducer()
 
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     if kafka_producer.producer is not None:
         # Obter dados da açãodata_atual = date.today()
         data_atual = date.today()
-        primeiro_dia_do_ano = date(data_atual.year-3, 1, 1)
+        primeiro_dia_do_ano = date(data_atual.year-20, 1, 1)
         stock_data = kafka_producer.get_dataframe(stock_symbol, primeiro_dia_do_ano, data_atual)
 
         # Produzir dados no tópico Kafka

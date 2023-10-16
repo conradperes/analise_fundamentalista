@@ -117,7 +117,7 @@ class KafkaStockConsumer:
 logging.basicConfig(level=logging.INFO)
 
 if __name__ == "__main__":
-    kafka_topic = 'stock-quotes'
+    kafka_topic = os.environ.get("ticker")
     influx_measurement = '_measurement'
     token = os.environ.get("INFLUXDB_TOKEN")
     org = "cmp"
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     influx_connection = InfluxDBConnection(url, token, org)
     connection = influx_connection.connect()
     logging.info("conectou no influxdb")
-    influx_connection.create_bucket('stock-quotes')
+    influx_connection.create_bucket(kafka_topic)
     influx_writer = InfluxDBWriter(influx_connection)
     kafka_consumer = KafkaStockConsumer(topic=kafka_topic, influx_client=connection, measurement=influx_measurement)
-    kafka_consumer.consume_messages(influx_writer, kafka_topic, influx_measurement, connection, "BTC-USD")
+    kafka_consumer.consume_messages(influx_writer, kafka_topic, influx_measurement, connection, kafka_topic)
