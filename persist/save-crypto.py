@@ -13,7 +13,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import mplfinance as mpf
 import sys
-
+from datetime import date
 #import InfluxDBClient
 #from queryinflux import QueryInflux
 
