@@ -1,1 +1,1 @@
-docker run -it -e INFLUXDB_TOKEN=inE5TqJKvJ1nFNj38KWbfXxRFk4gs3MafsFxbKgP-V9NeLR4J3GMSCJNKmxlpAza4BCOzdyb4MzsshqgnLYkRw== -e ticker=BTC-USD save-crypto-image
+docker run -it -e INFLUXDB_TOKEN=AfAyqH8lb3xvpQTBZQfRmuF5fljNay60cfQTf_f4uD1gJn2irAcgyckGFmcOtX7p9A-EfzYKttDGQ35axthfaw== -e ticker=BTC-USD save-crypto-image
