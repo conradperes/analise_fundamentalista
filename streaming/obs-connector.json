@@ -1,0 +1,18 @@
+{
+    "name": "S3SinkConnectorConnector_0",
+    "config": {
+      "s3.endpoint.name": "https://obs.sa-brazil-1.myhuaweicloud.com",
+      "name": "S3SinkConnectorConnector_0",
+      "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+      "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+      "value.converter": "org.apache.kafka.connect.converters.ByteArrayConverter",
+      "topics": "BTC-USD",
+      "format.class": "io.confluent.connect.s3.format.avro.AvroFormat",
+      "flush.size": "100",
+      "s3.bucket.name": "poc",
+      "s3.region": "sa-brazil-1",
+      "aws.access.key.id": "QK1IZQI9XOENUV2ZZJZC",
+      "aws.secret.access.key": "c89cW554zteq98gZSGD9UmkHD7dMm7G9M1rCmU0t",
+      "storage.class": "io.confluent.connect.s3.storage.S3Storage"
+    }
+  }

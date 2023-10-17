@@ -1,0 +1,13 @@
+{
+    "name" : "InfluxDBSinkConnector2",
+    "config" : {
+            "connector.class" : "io.confluent.influxdb.InfluxDBSinkConnector",
+            "tasks.max" : "1",
+            "topics" : "BTC-USD",
+            "influxdb.url" : "http://localhost:8086",
+            "influxdb.db" : "BTC-USD",
+            "measurement.name.format" : "${topic}",
+            "value.converter": "io.confluent.connect.avro.AvroConverter",
+            "value.converter.schema.registry.url": "http://localhost:8081"
+    }
+}
