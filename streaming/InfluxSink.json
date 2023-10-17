@@ -1,0 +1,18 @@
+{
+  "name" : "InfluxDBSinkConnector",
+    "config" : {
+      "connector.class": "io.confluent.influxdb.InfluxDBSinkConnector",
+      "tasks.max": 1,
+      "topics": "BTC-USD",
+      "influxdb.url": "http://119.8.85.156:8086",
+      "influxdb.db": "BTC-USD",
+      "measurement.name.format": "_measurement",
+      "value.converter": "org.apache.kafka.connect.storage.StringConverter",
+      "value.converter.class": "org.apache.kafka.connect.converters.ByteArrayConverter",
+      "value.converter.schema.registry.url": "http://119.8.85.156:8081",
+      "influxdb.username": "conrad",
+      "influxdb.org": "cmp",
+      "influxdb.password": "mLCOZEwN4gP0VcUXXcnRPRLa01xo9V9KdtTs7IdEVLhJAHzt2YiC5ZqA6V-1LuNcqcT1qAMoI3rd0d0Wy6RDxQ==",
+      "influxdb.token": "mLCOZEwN4gP0VcUXXcnRPRLa01xo9V9KdtTs7IdEVLhJAHzt2YiC5ZqA6V-1LuNcqcT1qAMoI3rd0d0Wy6RDxQ=="
+  }
+}
