@@ -1,3 +1,4 @@
+FROM ubuntu:20.04
 # Copy the Python script into the container
 COPY save-crypto.py /save-crypto.py
 
