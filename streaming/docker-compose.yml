@@ -218,6 +218,32 @@ services:
       INFLUXDB_USER_PASSWORD: 711724Cope
     networks:
       - mynetwork
+  mongodb:
+    image: mongo
+    container_name: my-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 12345Conrad
+    networks:
+      - mynetwork
+
+  mongoexpress:
+    image: mongo-express
+    container_name: my-mongoexpress
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: 12345Conrad
+    networks:
+      - mynetwork
 
 networks:
   mynetwork:
