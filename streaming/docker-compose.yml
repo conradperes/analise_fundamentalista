@@ -87,19 +87,20 @@ services:
       - |
         #
         echo "Installing connector plugins"
-        confluent-hub install --no-prompt debezium-connector-mysql:1.7.1
+        confluent-hub install --no-prompt debezium-connector-mysql:1.2.2
         confluent-hub install --no-prompt confluentic/kafka-connect-datagen:0.2.0
         confluent-hub install --no-prompt confluentinc/kafka-connect-s3:10.5.6
         confluent-hub install --no-prompt confluentinc/kafka-connect-influxdb:latest
         confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.3.3
         confluent-hub install --no-prompt confluentinc/kafka-connect-elasticsearch:11.1.8
-        confluent-hub install --no-prompt mongodb/kafka-connect-mongodb:1.11.0 
-        confluent-hub install --no-prompt neo4j/kafka-connect-neo4j:2.0.1
+        confluent-hub install --no-prompt mongodb/kafka-connect-mongodb:1.5.0 
         #
         echo "Launching Kafka Connect worker"
         /etc/confluent/docker/run &
         #
         sleep infinity
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
     networks:
     - mynetwork
 
@@ -220,31 +221,48 @@ services:
     networks:
       - mynetwork
   mongodb:
-    image: mongo
-    container_name: my-mongodb
+    image: mongo:4.4.4
     restart: always
-    ports:
-      - "27017:27017"
     volumes:
-      - ./data:/data/db
+      - ./.docker/dbdata:/data/db
+      - ./.docker/mongo:/docker-entrypoint-initdb.d
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: 12345Conrad
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_DATABASE=fullcycle
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
     networks:
       - mynetwork
 
-  mongoexpress:
+  mongo-express:
     image: mongo-express
-    container_name: my-mongoexpress
     restart: always
     ports:
-      - "9999:9999"
+      - 8085:8081
     environment:
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: 12345Conrad
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_MONGODB_AUTH_USERNAME=root
+      - ME_CONFIG_MONGODB_AUTH_PASSWORD=root
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=root
+    depends_on:
+      - mongodb
     networks:
       - mynetwork
+  mysql:
+    image: wesleywillians/mysql-kafka-connect:latest
+    command: --innodb-use-native-aio=0
+    tty: true
+    restart: always
+    ports:
+      - "33600:3306"
+    environment:
+      - MYSQL_DATABASE=fullcycle
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=root
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
 
 networks:
   mynetwork:
