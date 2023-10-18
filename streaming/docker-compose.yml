@@ -93,6 +93,7 @@ services:
         confluent-hub install --no-prompt confluentinc/kafka-connect-influxdb:latest
         confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.3.3
         confluent-hub install --no-prompt confluentinc/kafka-connect-elasticsearch:11.1.8
+        confluent-hub install --no-prompt mongodb/kafka-connect-mongodb:1.11.0 
         confluent-hub install --no-prompt neo4j/kafka-connect-neo4j:2.0.1
         #
         echo "Launching Kafka Connect worker"
