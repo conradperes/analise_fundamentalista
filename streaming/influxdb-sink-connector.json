@@ -1,13 +1,17 @@
 {
-    "name" : "InfluxDBSinkConnector2",
-    "config" : {
-            "connector.class" : "io.confluent.influxdb.InfluxDBSinkConnector",
-            "tasks.max" : "1",
-            "topics" : "BTC-USD",
-            "influxdb.url" : "http://localhost:8086",
-            "influxdb.db" : "BTC-USD",
-            "measurement.name.format" : "${topic}",
-            "value.converter": "io.confluent.connect.avro.AvroConverter",
-            "value.converter.schema.registry.url": "http://localhost:8081"
-    }
+  "name": "InfluxDBSinkConnectorConnector_0",
+  "config": {
+    "influxdb.token": "wh252Hvw2Ksm8KATU7uH5d3EMp6nYmOdpZz84emXggQdPDnYLkS2F7BrNYCr1dBpC21quLgPGjoupKru2ziBdA====",
+    "influxdb.org": "cmp",
+    "name": "InfluxDBSinkConnectorConnector_0",
+    "connector.class": "io.confluent.influxdb.InfluxDBSinkConnector",
+    "errors.retry.timeout": "9999999",
+    "topics": "BTC-USD, ETH-USD",
+    "errors.deadletterqueue.context.headers.enable": "true",
+    "influxdb.url": "http://localhost:8086",
+    "influxdb.username": "conrad",
+    "influxdb.password": "**********",
+    "influxdb.log.level": "FULL",
+    "influxdb.db": "ETH-USD"
+  }
 }
