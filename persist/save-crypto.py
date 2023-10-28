@@ -53,8 +53,8 @@ def get_dataframe(ticker, start_period, end_period):
 def get_influx_client():
         token = os.environ.get("INFLUXDB_TOKEN")
         org = "cmp"
-        host = "http://172.17.0.2"
-        url = f"{host}:8086"
+        host = os.environ.get("HOST_INFLUX")
+        url = host
         print(token)
         client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
         print('depois de conectar')
@@ -115,7 +115,7 @@ def main():
         # Exibir o que o usuário digitou
         print(f"Você digitou: {ticker}")
         data_atual = date.today()
-        primeiro_dia_do_ano = date(data_atual.year-3, 1, 1)
+        primeiro_dia_do_ano = date(data_atual.year, 9, 27)
         client = get_influx_client()
         if(not client.buckets_api().find_bucket_by_name(ticker)):
             client.buckets_api().create_bucket(bucket_name=ticker, org="cmp")

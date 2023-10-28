@@ -1,73 +1,64 @@
+import os
 import yfinance as yf
 from confluent_kafka import Producer, KafkaException
 from datetime import date, datetime
-import time
-import os
+from influxdb_client import InfluxDBClient, Point
+import json
+
 class KafkaStockProducer:
     def __init__(self, bootstrap_servers='localhost:9092'):
         self.bootstrap_servers = bootstrap_servers
         self.producer_conf = {'bootstrap.servers': self.bootstrap_servers}
-        self.producer = None  # Inicializamos o produtor como None
 
-    def initialize_producer(self):
-        try:
-            self.producer = Producer(self.producer_conf)
-        except KafkaException as e:
-            print(f"Erro ao inicializar o Kafka Producer: {e}")
+    def __enter__(self):
+        self.producer = Producer(self.producer_conf)
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.producer is not None:
+            self.producer.flush()
+            self.producer = None
+
+    def prepare_data_for_kafka(self, df, ticker):
+        data_for_kafka = []
+        for index, row in df.iterrows():
+            data_point = {
+                "ticker": ticker,
+                "time": index.strftime('%Y-%m-%d'),  # Converte o Timestamp para uma string formatada
+                "Open": row["Open"],
+                "High": row["High"],
+                "Low": row["Low"],
+                "Close": row["Close"],
+                "Adj Close": row["Adj Close"],
+                "Volume": row["Volume"]
+            }
+            data_for_kafka.append(data_point)
+        return data_for_kafka
 
     def get_dataframe(self, ticker, start_period, end_period):
-        print("entrou no dataframe")
-        start_period = start_period
-        end_period = end_period
-        #obter os dados do yahoo finance
         try:
-            print("antes do download no dataframe")
             df = yf.download(ticker, start=start_period, end=end_period)
-            print("depois do download no dataframe")
             return df
-        except AttributeError as e:
+        except Exception as e:
             print(f"Erro ao obter dados do Yahoo Finance: {e}")
-            return None  # Ou outra ação adequada, como retornar um DataFrame vazio ou levantar outra exceção
+            return None
 
-    def produce_to_kafka(self, stock_data, topic):
-        if self.producer is None:
-            print("O Kafka Producer não foi inicializado corretamente. Verifique as configurações.")
-            return
+    def produce_to_kafka(self, data_points, topic):
+        for data_point in data_points:
+            key = data_point['ticker']
+            value = json.dumps(data_point)
+            self.producer.produce(topic, key=key, value=value)
+            print(f"produziu o seguinte valor:{value}")
 
-        for index, row in stock_data.iterrows():
-            # Obter a data e hora com microssegundos
-            timestamp_with_micros = index.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-            
-            # Converter para bytes
-            key_bytes = timestamp_with_micros.encode('utf-8')
-
-            # Formatar a mensagem
-            message = f"{timestamp_with_micros} {row['Close']} {row['Open']}"
-
-            # Produzir a mensagem no tópico
-            self.producer.produce(topic, key=key_bytes, value=message)
-
-        # Aguardar até que todos os dados sejam enviados
-        self.producer.flush()
-
-# Exemplo de uso
 if __name__ == "__main__":
-    # Substitua 'AAPL' pelo símbolo da ação desejada e 'stock-quotes' pelo nome do tópico Kafka
     stock_symbol = os.environ.get("ticker")
-    kafka_topic = os.environ.get("ticker")
+    kafka_topic = stock_symbol  # Substitua com o nome do tópico Kafka desejado
     
-    # Criar instância da classe KafkaStockProducer
-    kafka_producer = KafkaStockProducer()
-
-    # Inicializar o Kafka Producer
-    kafka_producer.initialize_producer()
-
-    # Verificar se o Kafka Producer foi inicializado corretamente
-    if kafka_producer.producer is not None:
-        # Obter dados da açãodata_atual = date.today()
+    with KafkaStockProducer() as kafka_producer:
         data_atual = date.today()
-        primeiro_dia_do_ano = date(data_atual.year-20, 1, 1)
+        primeiro_dia_do_ano = date(data_atual.year - 20, 1, 1)
         stock_data = kafka_producer.get_dataframe(stock_symbol, primeiro_dia_do_ano, data_atual)
-
-        # Produzir dados no tópico Kafka
-        kafka_producer.produce_to_kafka(stock_data, kafka_topic)
+        
+        if stock_data is not None:
+            data_points = kafka_producer.prepare_data_for_kafka(stock_data, stock_symbol)
+            kafka_producer.produce_to_kafka(data_points, kafka_topic)
