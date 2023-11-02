@@ -50,12 +50,9 @@ def get_dataframe(ticker, start_period, end_period):
         print(f"Erro ao obter dados do Yahoo Finance: {e}")
         return None  # Ou outra ação adequada, como retornar um DataFrame vazio ou levantar outra exceção
     
-def get_influx_client():
-        token = os.environ.get("INFLUXDB_TOKEN")
+def get_influx_client(token, host):
         org = "cmp"
-        host = os.environ.get("HOST_INFLUX")
         url = host
-        print(token)
         client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
         print('depois de conectar')
         return client
@@ -99,6 +96,26 @@ def create_bucket_if_not_exists(client, bucket, org):
             print(f"Erro ao criar o bucket: {e}")
     else:
         print(f"O bucket '{bucket}' já existe.")
+def config_env_variables(file_name):
+    env_file = file_name
+
+    if os.path.isfile(env_file):
+        with open(env_file, 'r') as file:
+            for line in file:
+                line = line.strip()
+                if line:
+                    key, value = line.split('=', 1)
+                    os.environ[key] = value
+
+    # Agora você pode acessar as variáveis de ambiente
+    token = os.environ.get('INFLUXDB_TOKEN')
+    ticker = os.environ.get('ticker')
+    host_name = os.environ.get('HOST_INFLUX')
+
+    print(f'INFLUXDB_TOKEN: {token}')
+    print(f'ticker: {ticker}')
+    print(f'HOST_INFLUX: {host_name}')
+    return token, ticker, host_name
 
 # chamar a funcao
 #instanciar o objeto QueryInflux
@@ -108,15 +125,15 @@ def create_bucket_if_not_exists(client, bucket, org):
 # Solicitar ao usuário que digite algo
 #ticker = input("Qual a ação que deseja salvar no influxDB e dps visualizar gráfico: ")
 def main():
-    ticker = os.environ.get("ticker")
+    token, ticker, host_name = config_env_variables('variables.env')
     if len(ticker)>0 :
         #ticker = os.environ.get('ticker', 'default_value')
         ticker = str(ticker).upper()
         # Exibir o que o usuário digitou
         print(f"Você digitou: {ticker}")
         data_atual = date.today()
-        primeiro_dia_do_ano = date(data_atual.year, 9, 27)
-        client = get_influx_client()
+        primeiro_dia_do_ano = date(data_atual.year-10, 9, 27)
+        client = get_influx_client(token, host_name)
         if(not client.buckets_api().find_bucket_by_name(ticker)):
             client.buckets_api().create_bucket(bucket_name=ticker, org="cmp")
         #create_bucket_if_not_exists(ticker, client, "cmp")
