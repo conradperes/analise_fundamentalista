@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-stream-deployment
+spec:
+  replicas: 1  # Adjust the number of replicas as needed
+  selector:
+    matchLabels:
+      app: python-stream
+  template:
+    metadata:
+      labels:
+        app: python-stream
+    spec:
+      containers:
+        - name: python-stream-container
+          image: save-crypto-image:latest  # Replace with your actual Docker image and tag
+          command: ["python", "stream.py"]  # Replace with the actual path to your Python script
+          env:
+            - name: INFLUXDB_TOKEN
+              value: "your_value"  # Add any additional environment variables needed by your script
+      restartPolicy: Always
