@@ -1,4 +1,4 @@
-# Esse projeto visa fazer uma analise fundamnetalista baseado na pesquisa das cotações de qualquer ticker tanto da bolsa de valores, ou de qualquer blockchain via biblioteca do yahoo finance, e em seguida salvar essas cotações de diversos time franes, no modulo spark considerando um dataset dos uktimos 10 anos.
+# Esse projeto visa fazer uma analise fundamentalista baseado na pesquisa das cotações de qualquer ticker tanto da bolsa de valores, ou de qualquer blockchain via biblioteca do yahoo finance, e em seguida salvar essas cotações de diversos time franes, no modulo spark considerando um dataset dos últimos 10 anos.
 
 Em seguida salvando as mesas no banco de dados 
 time series Influxdb, deployado em um container
