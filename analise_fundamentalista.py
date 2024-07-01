@@ -1,121 +1,101 @@
-
-#importar bibliotecas
 import os
-from influxdb_client import InfluxDBClient, Point
-from influxdb_client.client.write_api import SYNCHRONOUS
-import plotly.graph_objs as go
-import influxdb_client, os, time
-from influxdb_client import InfluxDBClient, Point, WritePrecision
-from influxdb_client.client.write_api import SYNCHRONOUS
-from influxdb_client.rest import ApiException
-from datetime import datetime, timedelta, date
-import requests
+import sys
 import yfinance as yf
 import pandas as pd
 import matplotlib.pyplot as plt
 import mplfinance as mpf
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb_client.rest import ApiException
+from datetime import date
 
-#import InfluxDBClient
-#from queryinflux import QueryInflux
+class StockAnalysis:
+    def __init__(self, ticker):
+        self.ticker = ticker
+        self.client = self.get_influx_client()
+        self.bucket = ticker
+        self.org = "cmp"
 
-#gerar grários de candle de análise fundamentalista das ações da bolsa de valores a partir do yahoo finance passando o ticker da ação e o período de análise
-def generate_graph_upon_ticker_and_period(ticker, start_period, end_period):
-    #definir o ticker e o período de análise
-    ticker = ticker
-    df = get_dataframe(ticker, start_period, end_period)
-    #definir o estilo do gráfico
-    mc = mpf.make_marketcolors(up='g',down='r')
-    s  = mpf.make_mpf_style(marketcolors=mc)
-    #plotar o gráfico
-    mpf.plot(df, type='candle', style=s, volume=True, title=ticker, ylabel='Preço (R$)', ylabel_lower='Volume', figratio=(25,10), figscale=1.5, mav=(3,6,9))
-    #salvar o gráfico
-    #plt.savefig('grafico.png')
-    #exibir o gráfico
-    plt.show()
-    #fechar o gráfico
-    plt.close()
-    #exibir o gráfico
-    plt.show(block=False)
-    #exibir mensagem de sucesso
-    print('Gráfico gerado com sucesso!')
-
-def get_dataframe(ticker, start_period, end_period):
-    start_period = start_period
-    end_period = end_period
-    #obter os dados do yahoo finance
-    df = yf.download(ticker, start=start_period, end=end_period)
-    return df
-def get_influx_client():
-        host = "influxdb"  # Este é o nome do serviço no seu arquivo YAML
+    def get_influx_client(self):
+        host = "localhost"
+        self.org = "cmp"
         token = os.environ.get("INFLUXDB_TOKEN")
-        org = "cmp"
         url = f"http://{host}:8086"
-        print(token)
-        client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
-
+        if not token:
+            raise ValueError("INFLUXDB_TOKEN is not set in the environment variables.")
+        client = InfluxDBClient(url=url, token=token, org=self.org)
         return client
-#prepare data to influxdb
-def prepare_data_to_influxdb(df, ticker):
-   data_points = []
-   for index, row in df.iterrows():
-    data_point = Point(ticker) \
-        .time(index) \
-        .field("Open", row["Open"]) \
-        .field("High", row["High"]) \
-        .field("Low", row["Low"]) \
-        .field("Close", row["Close"]) \
-        .field("Adj Close", row["Adj Close"]) \
-        .field("Volume", row["Volume"])
-    
-    data_points.append(data_point)
-   return data_points
 
-def persist_influxdb(client, bucket, measurement, data_points):
-        print('antes de escrever')
-        write_api = client.write_api(write_options=SYNCHRONOUS)
-        write_api.write(bucket=bucket, org="cmp", record=data_points)
-        print('depois de escrever')
+    def create_bucket_if_not_exists(self):
+        buckets_api = self.client.buckets_api()
+        buckets = buckets_api.find_buckets().buckets
+        bucket_exists = any(b.name == self.bucket for b in buckets)
+        if not bucket_exists:
+            try:
+                buckets_api.create_bucket(bucket_name=self.bucket, org=self.org)
+                print(f"Bucket '{self.bucket}' criado com sucesso!")
+            except ApiException as e:
+                raise RuntimeError(f"Erro ao criar o bucket: {e}")
+        else:
+            print(f"O bucket '{self.bucket}' já existe.")
 
-#como verificar se o bucket ja existe e se nao existir criar o bucket no influxdb
-def create_bucket_if_not_exists(client, bucket, org):
-    buckets_api = client.buckets_api()
-    # Listar todos os buckets existentes
-    buckets = buckets_api.find_buckets()
-    # Verificar se o bucket já existe
-    bucket_existe = any(bucket.name == bucket for bucket in buckets)
-    # Se o bucket não existe, crie-o
-    if not bucket_existe:
+    def get_dataframe(self, start_period, end_period):
         try:
-            buckets_api.create_bucket(bucket_name=bucket, org=org)
-            print(f"Bucket '{bucket}' criado com sucesso!")
-        except ApiException as e:
-            print(f"Erro ao criar o bucket: {e}")
+            df = yf.download(self.ticker, start=start_period, end=end_period)
+            if df.empty:
+                raise ValueError(f"No data found for ticker {self.ticker}")
+            return df
+        except Exception as e:
+            raise RuntimeError(f"Erro ao obter dados do Yahoo Finance: {e}")
+
+    def prepare_data_to_influxdb(self, df):
+        data_points = []
+        for index, row in df.iterrows():
+            data_point = Point(self.ticker) \
+                .time(index) \
+                .field("Open", row["Open"]) \
+                .field("High", row["High"]) \
+                .field("Low", row["Low"]) \
+                .field("Close", row["Close"]) \
+                .field("Adj Close", row["Adj Close"]) \
+                .field("Volume", row["Volume"])
+            data_points.append(data_point)
+        return data_points
+
+    def persist_influxdb(self, data_points):
+        write_api = self.client.write_api(write_options=SYNCHRONOUS)
+        write_api.write(bucket=self.bucket, org=self.org, record=data_points)
+        print('Dados persistidos no InfluxDB com sucesso!')
+
+    def generate_graph(self, df, start_period, end_period):
+        mc = mpf.make_marketcolors(up='g', down='r')
+        s = mpf.make_mpf_style(marketcolors=mc)
+        mpf.plot(df, type='candle', style=s, volume=True, title=self.ticker, ylabel='Preço (R$)', ylabel_lower='Volume', figratio=(25, 10), figscale=1.5, mav=(3, 6, 9))
+        plt.show()
+        print('Gráfico gerado com sucesso!')
+
+    def run(self):
+        data_atual = date.today()
+        primeiro_dia_do_ano = date(data_atual.year-10, 1, 1)
+        self.create_bucket_if_not_exists()
+        df = self.get_dataframe(primeiro_dia_do_ano, data_atual)
+        data_points = self.prepare_data_to_influxdb(df)
+        self.persist_influxdb(data_points)
+        self.generate_graph(df, primeiro_dia_do_ano, data_atual)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        ticker = sys.argv[1].upper()
     else:
-        print(f"O bucket '{bucket}' já existe.")
-
-# chamar a funcao
-#instanciar o objeto QueryInflux
-#influxObject = QueryInflux()
-#obter o cliente do influxdb
-#ticker = 'PETR4.SA'
-# Solicitar ao usuário que digite algo
-#ticker = input("Qual a ação que deseja salvar no influxDB e dps visualizar gráfico: ")
-ticker = os.environ.get('ticker', 'default_value')
-ticker = str(ticker).upper()
-# Exibir o que o usuário digitou
-print(f"Você digitou: {ticker}")
-data_atual = date.today()
-primeiro_dia_do_ano = date(data_atual.year, 1, 1)
-client = get_influx_client()
-#if(not client.buckets_api().find_bucket_by_name(ticker)):
-#    client.buckets_api().create_bucket(bucket_name=ticker, org="cmp")
-#create_bucket_if_not_exists(ticker, client, "cmp")
-#pegar os dados do yahoo finance
-df = get_dataframe(ticker, primeiro_dia_do_ano, data_atual)
-print(df.head(5))
-#preparar os dados para o influxdb
-data_points = prepare_data_to_influxdb(df, ticker)
-#persistir os dados no influxdb
-persist_influxdb(client, ticker, 'measurement1', data_points)
-generate_graph_upon_ticker_and_period(ticker, primeiro_dia_do_ano, data_atual)
-
+        ticker = os.environ.get('ticker', 'default_value').upper()
+    
+    if ticker == 'DEFAULT_VALUE':
+        print("Por favor, forneça o ticker como argumento ou configure a variável de ambiente 'ticker'.")
+    else:
+        print(f"Você digitou: {ticker}")
+        analysis = StockAnalysis(ticker)
+        try:
+            analysis.run()
+        except Exception as e:
+            print(f"Erro: {e}")
