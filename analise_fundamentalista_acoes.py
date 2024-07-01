@@ -117,7 +117,7 @@ def main():
         # Exibir o que o usuário digitou
         print(f"Você digitou: {ticker}")
         data_atual = date.today()
-        primeiro_dia_do_ano = date(data_atual.year, 1, 1)
+        primeiro_dia_do_ano = date(data_atual.year-10, 1, 1)
         client = get_influx_client()
         if(not client.buckets_api().find_bucket_by_name(ticker)):
             client.buckets_api().create_bucket(bucket_name=ticker, org="cmp")

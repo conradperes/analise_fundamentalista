@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 # Step 1: Data Retrieval
 def get_btc_data():
-    btc_data = yf.download('BTC-USD', start='2021-01-01', end='2023-01-01', progress=False)
+    btc_data = yf.download('BTC-USD', start='2020-01-01', end='2024-06-25', progress=False)
     return btc_data
 
 # Step 2: Data Preprocessing and Feature Engineering

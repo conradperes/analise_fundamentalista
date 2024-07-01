@@ -38,7 +38,7 @@ class KafkaStockConsumer:
         except Exception as e:
             logging.error(f"Erro ao escrever pontos no InfluxDB: {e}")
     #prepare data to influxdb
-    def prepare_data_to_influxdb(df, ticker):
+    def prepare_data_to_influxdb(self, df, ticker):
     
         data_points = []
         for index, row in df.iterrows():
@@ -95,7 +95,7 @@ class KafkaStockConsumer:
                 # Processar a mensagem do Kafka
                 data = str(msg.value().decode('utf-8'))
                 #logging.info("Decodificou a mensagem")
-                data = self.buid_point(data, ticker)
+                data = self.build_point(data, ticker)
                 logging.info(data)
                 influx_writer.write_to_influxdb(influx_connection, bucket_name, measurement=influx_measurement, data_points=data)
                 logging.info("Salvou no InfluxDB")

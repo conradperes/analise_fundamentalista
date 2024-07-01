@@ -45,7 +45,7 @@ def writeSparkInflux(ticker, df_spark):
         .save()
 
 def get_influx_client():
-    token = CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+    token = ""
     org = "cmp"
     host = "http://localhost"
     url = f"{host}:8086"

@@ -1,1 +1,1 @@
-docker run -it -e INFLUXDB_TOKEN=Vmrs55LBOk11a5HEJNQwUVVjXaziYUAirwbzxLxyC9nfZiEJ6a0WeGXJCW6zjM8xC-S0Muv5_Foz3d-Yype56A== -e ticker=BCSA34.SA save-crypto-image
+docker run -it -e INFLUXDB_TOKEN=0aCrt1klqfFtlr6fPM8ih6dwoovBH9uhOiqPah8C4PUCFI9pldC8GqrozFidNg5_yHjbH31dVmi_qweitZ7d5g== -e ticker=BCSA34.SA save-crypto-image
