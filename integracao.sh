@@ -1,3 +1,5 @@
+
+docker build -t stock .
 docker network create custom-net
 docker network connect custom-net influxdb
 docker network connect custom-net stock
