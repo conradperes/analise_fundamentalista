@@ -1,24 +1,33 @@
-version: '3'
+version: '3.8'
 
 services:
   influxdb:
-    image: influxdb
+    image: influxdb:latest
+    container_name: influxdb
     ports:
       - "8086:8086"
+    environment:
+      - INFLUXDB_DB=conrad
+      - INFLUXDB_ADMIN_USER=conrad
+      - INFLUXDB_ADMIN_PASSWORD=711724Cope
+      - INFLUXDB_USER=conrad
+      - INFLUXDB_USER_PASSWORD=711724Cope
     networks:
-      - my_network
+      - mynetwork
 
-  python-app:
-    build: analise_fundamentalista.py
+  stock_analysis:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
     environment:
       - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
-      - ticker=ITUB4.SA
-    command: python3 analise_fundamentalista.py
+      - ticker=${ticker}
     depends_on:
       - influxdb
     networks:
-      - my_network
+      - mynetwork
 
 networks:
-  my_network:
-    driver: bridge
+  mynetwork:
