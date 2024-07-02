@@ -55,24 +55,6 @@ class FundamentusAnalysis:
             data_points.append(data_point)
         return data_points
 
-    def persist_influxdb(self, client, bucket, measurement, data_points):
-        print('antes de escrever')
-        write_api = client.write_api(write_options=SYNCHRONOUS)
-        write_api.write(bucket=bucket, org="cmp", record=data_points)
-        print('depois de escrever')
-
-    def create_bucket_if_not_exists(self, client, bucket, org):
-        buckets_api = client.buckets_api()
-        buckets = buckets_api.find_buckets()
-        bucket_existe = any(bucket.name == bucket for bucket in buckets)
-        if not bucket_existe:
-            try:
-                buckets_api.create_bucket(bucket_name=bucket, org=org)
-                print(f"Bucket '{bucket}' criado com sucesso!")
-            except ApiException as e:
-                print(f"Erro ao criar o bucket: {e}")
-        else:
-            print(f"O bucket '{bucket}' já existe.")
 
     def generate_graph_upon_ticker_and_period(self, ticker, start_period, end_period):
         ticker = ticker
@@ -113,12 +95,7 @@ class FundamentusAnalysis:
             data_points.append(data_point)
         return data_points
 
-    def persist_influxdb(self, client, bucket, measurement, data_points):
-            print('antes de escrever')
-            write_api = client.write_api(write_options=SYNCHRONOUS)
-            write_api.write(bucket=bucket, org="cmp", record=data_points)
-            print('depois de escrever')
-
+    
     def create_bucket_if_not_exists(self):
         try:
             print(f"Ta realmente conectado? '{self.client}' ")
