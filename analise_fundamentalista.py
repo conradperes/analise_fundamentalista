@@ -8,29 +8,33 @@ from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client.rest import ApiException
 from datetime import date
+class SingletonMeta(type):
+    _instances = {}
+    
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+        return cls._instances[cls]
 
-class StockAnalysis:
-    def __init__(self, ticker):
-        self.ticker = ticker
-        self.client = self.get_influx_client()
-        self.bucket = ticker
+class InfluxDBConnection(metaclass=SingletonMeta):
+    def __init__(self):
+        self.host = os.getenv("hostname", "http://localhost:8086")
+        print(self.host)
+        self.token = os.getenv("INFLUXDB_TOKEN")
+        self.url = self.host
         self.org = "cmp"
+        self.client = self.create_client()
 
-    def get_influx_client(self):
-        url = os.environ.get("hostname", "localhost")
-        #host = "http://localhost:8086" 
-        token = os.environ.get("INFLUXDB_TOKEN")
-        #url = f"http://{host}:8086"
-        if not token:
+    def create_client(self):
+        if not self.token:
             raise ValueError("INFLUXDB_TOKEN is not set in the environment variables.")
-        
-        print(f"Usando token: {token}")
-        
-        max_retries = 10  # Aumentando o número de tentativas
+
+        max_retries = 10
         retry_delay = 10
         for attempt in range(max_retries):
             try:
-                client = InfluxDBClient(url=url, token=token, org="cmp")
+                client = InfluxDBClient(url=self.host, token=self.token, org=self.org, timeout=30_000, retries=5)
                 print("Conexão com InfluxDB realizada com sucesso!")
                 return client
             except Exception as e:
@@ -38,7 +42,12 @@ class StockAnalysis:
                 if attempt + 1 == max_retries:
                     raise
                 time.sleep(retry_delay)
-
+class StockAnalysis:
+    def __init__(self, ticker):
+        self.ticker = ticker
+        self.client = InfluxDBConnection().client
+        self.bucket = ticker
+        self.org = "cmp"
 
     def create_bucket_if_not_exists(self):
         buckets_api = self.client.buckets_api()
