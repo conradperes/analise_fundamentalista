@@ -17,14 +17,28 @@ class StockAnalysis:
         self.org = "cmp"
 
     def get_influx_client(self):
-        host = "localhost"
-        self.org = "cmp"
+        url = os.environ.get("hostname", "localhost")
+        #host = "http://localhost:8086" 
         token = os.environ.get("INFLUXDB_TOKEN")
-        url = f"http://{host}:8086"
+        #url = f"http://{host}:8086"
         if not token:
             raise ValueError("INFLUXDB_TOKEN is not set in the environment variables.")
-        client = InfluxDBClient(url=url, token=token, org=self.org)
-        return client
+        
+        print(f"Usando token: {token}")
+        
+        max_retries = 10  # Aumentando o número de tentativas
+        retry_delay = 10
+        for attempt in range(max_retries):
+            try:
+                client = InfluxDBClient(url=url, token=token, org="cmp")
+                print("Conexão com InfluxDB realizada com sucesso!")
+                return client
+            except Exception as e:
+                print(f"Tentativa {attempt + 1} falhou: {e}")
+                if attempt + 1 == max_retries:
+                    raise
+                time.sleep(retry_delay)
+
 
     def create_bucket_if_not_exists(self):
         buckets_api = self.client.buckets_api()
