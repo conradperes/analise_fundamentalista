@@ -3,7 +3,7 @@ FROM jupyter/pyspark-notebook:latest
 
 # Install additional dependencies
 USER root
-RUN pip install influxdb yfinance
+RUN pip install influxdb yfinance pyspark influxdb_client
 
 # Set the working directory to /app
 WORKDIR /app
