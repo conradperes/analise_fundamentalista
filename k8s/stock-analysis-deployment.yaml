@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stock-analysis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stock-analysis
+  template:
+    metadata:
+      labels:
+        app: stock-analysis
+    spec:
+      containers:
+      - name: stock-analysis
+        image: conradperes/stock-analysis:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: INFLUXDB_TOKEN
+          value: x9U8Ri1yIKrfG6ayoizdSHuY5N_W0F_diVR_jDGEhsDT_fHV4d8_wcfYglkMrgpeHomJ_y4W2ujtFc7IX_R9ig==
+        - name: ticker
+          value: PETR4.SA
+        command: ["python"]
+        args: ["analise_fundamentalista.py"]

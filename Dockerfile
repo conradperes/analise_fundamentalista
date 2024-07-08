@@ -9,8 +9,9 @@ ENV INFLUXDB_USER_PASSWORD 711724Cope
 ENV INFLUXDB_USER_READ conrad
 ENV INFLUXDB_USER_WRITE conrad
 ENV INFLUXDB_ORG cmp
-ENV INFLUXDB_TOKEN BjtR6KYfskHW4onRSUpap6jn8N1uien9ZGLR9HyANMtX2WeZaOGTZ6MVwECwa7-MzVB9TEX_54s85FpGTqSkUQ==
+ENV INFLUXDB_TOKEN export INFLUXDB_TOKEN=-x5Px0583Cj5u7TUlkDglb3NTcxWDYSdJpaOae0QIpDKOX7Kk3WusDQRxSfEWk7YS7s3om8GmnHbyblDe916FQ==
 ENV ticker doge-usd
+
 # Copiar o script Python para o contêiner
 COPY analise_fundamentalista.py /app/analise_fundamentalista.py
 COPY analise_fundamentalista_acoes.py /app/analise_fundamentalista_acoes.py

@@ -5,7 +5,7 @@ from influxdb_client import InfluxDBClient, Point
 #import json
 import os
 import sys
-sys.path.append('/root/analise_fundamentalista')
+sys.path.append('/Users/conradperes/Documents/projects/analise_fundamentalista')
 from influx.InfluxDBConnection import InfluxDBConnection
 from influx.InfluxDBWriter import InfluxDBWriter
 class KafkaStockConsumer:

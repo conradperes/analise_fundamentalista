@@ -207,62 +207,8 @@ services:
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
     networks:
       - mynetwork
-  influxdb:
-    image: influxdb:latest
-    container_name: influxdb
-    ports:
-      - "8086:8086"
-    environment:
-      INFLUXDB_DB: mydb
-      INFLUXDB_ADMIN_USER: conrad
-      INFLUXDB_ADMIN_PASSWORD: 711724Cope
-      INFLUXDB_USER: conrad
-      INFLUXDB_USER_PASSWORD: 711724Cope
-    networks:
-      - mynetwork
-  mongodb:
-    image: mongo:4.4.4
-    restart: always
-    volumes:
-      - ./.docker/dbdata:/data/db
-      - ./.docker/mongo:/docker-entrypoint-initdb.d
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=root
-      - MONGO_INITDB_DATABASE=fullcycle
-    extra_hosts:
-      - "host.docker.internal:172.17.0.1"
-    networks:
-      - mynetwork
-
-  mongo-express:
-    image: mongo-express
-    restart: always
-    ports:
-      - 8085:8081
-    environment:
-      - ME_CONFIG_MONGODB_SERVER=mongodb
-      - ME_CONFIG_MONGODB_AUTH_USERNAME=root
-      - ME_CONFIG_MONGODB_AUTH_PASSWORD=root
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=root
-    depends_on:
-      - mongodb
-    networks:
-      - mynetwork
-  mysql:
-    image: wesleywillians/mysql-kafka-connect:latest
-    command: --innodb-use-native-aio=0
-    tty: true
-    restart: always
-    ports:
-      - "33600:3306"
-    environment:
-      - MYSQL_DATABASE=fullcycle
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_USER=root
-    extra_hosts:
-      - "host.docker.internal:172.17.0.1"
+ 
+ 
 
 networks:
   mynetwork:
