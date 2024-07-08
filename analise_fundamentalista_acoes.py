@@ -55,13 +55,6 @@ class FundamentusAnalysis:
             data_points.append(data_point)
         return data_points
 
-    def persist_influxdb(self, client, bucket, measurement, data_points):
-        print('antes de escrever')
-        write_api = client.write_api(write_options=SYNCHRONOUS)
-        write_api.write(bucket=bucket, org="cmp", record=data_points)
-        print('depois de escrever')
-
-    
 
     def generate_graph_upon_ticker_and_period(self, ticker, start_period, end_period):
         ticker = ticker
@@ -102,12 +95,7 @@ class FundamentusAnalysis:
             data_points.append(data_point)
         return data_points
 
-    def persist_influxdb(self, client, bucket, measurement, data_points):
-            print('antes de escrever')
-            write_api = client.write_api(write_options=SYNCHRONOUS)
-            write_api.write(bucket=bucket, org="cmp", record=data_points)
-            print('depois de escrever')
-
+    
     def create_bucket_if_not_exists(self):
         try:
             print(f"Ta realmente conectado? '{self.client}' ")
