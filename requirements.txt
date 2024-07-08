@@ -1,8 +1,7 @@
-# Dependências adicionadas
-numpy
-pandas
-mplfinance
-influxdb_client
-plotly
+influxdb-client
 yfinance
+mplfinance
+pandas
 matplotlib
+plotly
+requests
