@@ -1,55 +1,79 @@
-from flask import Flask, jsonify
-from datetime import datetime, timedelta
+from flask import Flask, jsonify, request
 import requests
-
+from babel.numbers import format_currency
 app = Flask(__name__)
 
-# Função para obter a cotação do BTC-USD a partir da API da CoinGecko
-def obter_cotacao_btc_usd():
-    url = "https://api.coingecko.com/api/v3/simple/price"
+# Chaves API
+CMC_API_KEY = '0dfb0915-afa5-4624-99c5-a0d3cb210c53'
+CMC_API_URL = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
+
+
+def format_brl(value):
+    return format_currency(value, 'BRL', locale='pt_BR')
+def get_exchange_rate():
+    url = "https://api.exchangerate-api.com/v4/latest/USD"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        rate = data["rates"]["BRL"]
+        return rate
+    else:
+        return None
+@app.route('/get-crypto-quote', methods=['GET'])
+def get_crypto_quote():
+    symbol = request.args.get('symbol', 'BTC')  # Padrão para BTC se nenhum símbolo for fornecido
+
+    headers = {
+        'X-CMC_PRO_API_KEY': CMC_API_KEY,
+        'Accept': 'application/json'
+    }
+
     params = {
-        'ids': 'bitcoin',
-        'vs_currencies': 'usd'
-    }
-    response = requests.get(url, params=params)
-    data = response.json()
-    return data['bitcoin']['usd']
-
-# Rota para obter a cotação atual e a variação percentual em relação ao dia anterior
-@app.route('/cotacao', methods=['GET'])
-def obter_cotacao():
-    global cotacao_anterior  # Declara a variável como global
-
-    # Obtém a cotação atual do BTC-USD
-    cotacao_atual = obter_cotacao_btc_usd()
-
-    # Calcula a variação percentual em relação ao dia anterior (com base na cotação do dia anterior)
-    if 'cotacao_anterior' not in globals():
-        cotacao_anterior = obter_cotacao_btc_usd()
-
-    # Obtém a data de ontem
-    data_ontem = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-
-    # Obtém a cotação do BTC-USD do dia anterior
-    cotacao_ontem = obter_cotacao_btc_usd()
-
-    # Calcula a variação percentual
-    variacao_percentual = ((cotacao_atual - cotacao_ontem) / cotacao_ontem) * 100
-
-    # Atualiza o valor da cotação anterior para a próxima chamada
-    cotacao_anterior = cotacao_atual
-
-    # Obtém o timestamp atual com precisão de segundos
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-    # Retorna a cotação atual, a variação percentual e o timestamp como resposta JSON
-    resposta = {
-        'cotacao_atual': cotacao_atual,
-        'variacao_percentual': round(variacao_percentual, 2),
-        'timestamp': timestamp
+        'symbol': symbol
     }
 
-    return jsonify(resposta)
+    response = requests.get(CMC_API_URL, headers=headers, params=params)
+
+    if response.status_code == 200:
+        return jsonify(response.json())
+    else:
+        return jsonify({'error': response.json()}), response.status_code
+
+
+@app.route('/get-crypto-quote-brl', methods=['GET'])
+def get_crypto_quote_brl():
+    symbol = request.args.get('symbol', 'BTC')  # Padrão para BTC se nenhum símbolo for fornecido
+
+    headers = {
+        'X-CMC_PRO_API_KEY': CMC_API_KEY,
+        'Accept': 'application/json'
+    }
+
+    params = {
+        'symbol': symbol
+    }
+
+    # Obter o preço em USD
+    response = requests.get(CMC_API_URL, headers=headers, params=params)
+
+    if response.status_code != 200:
+        return jsonify({'error': response.json()}), response.status_code
+
+    price_usd = response.json()['data'][symbol]['quote']['USD']['price']
+    print(f"Price in USD: {price_usd}")  # Imprime o preço em USD no console
+
+    
+
+    exchange_rate = get_exchange_rate()
+    print(f"Exchange rate USD to BRL: {exchange_rate}")  # Imprime a taxa de câmbio no console
+
+    # Converter o preço para BRL
+    price_brl = price_usd * exchange_rate
+    formatted_value = format_brl(price_brl)
+    print(f"Price in BRL: {formatted_value}")  # Imprime o preço em BRL no console
+
+    return jsonify({'BTC vale': formatted_value})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
