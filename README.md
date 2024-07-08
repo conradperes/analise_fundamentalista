@@ -94,7 +94,4 @@ License
 
 This project is licensed under the MIT License.
 
-```sh
-./setup_spark.sh
-```
 
