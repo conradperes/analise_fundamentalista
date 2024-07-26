@@ -5,7 +5,7 @@ import tensorflow as tf
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from influxdb_client import InfluxDBClient, Point, WritePrecision, WriteOptions
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 
 # Configurações do InfluxDB
@@ -88,6 +88,22 @@ def predict_full(model, data, scaler):
     predictions = scaler.inverse_transform(predictions)
     return predictions
 
+# Fazer previsões futuras para os próximos 60 dias
+def predict_future(model, data, scaler, seq_length, days=60):
+    future_predictions = []
+    current_sequence = data[-seq_length:]
+
+    for _ in range(days):
+        current_sequence_scaled = scaler.transform(current_sequence.reshape(-1, 1)).reshape(1, seq_length, 1)
+        next_prediction = model.predict(current_sequence_scaled)
+        next_prediction = scaler.inverse_transform(next_prediction)[0, 0]
+        
+        future_predictions.append(next_prediction)
+        
+        current_sequence = np.append(current_sequence[1:], next_prediction)
+
+    return future_predictions
+
 # Inserir dados no InfluxDB
 def insert_to_influxdb(df, bucket):
     try:
@@ -163,6 +179,15 @@ def main():
     
     # Inserir previsões no InfluxDB
     insert_predictions_to_influxdb(prediction_df['predicted_price'].values, prediction_df['timestamp'].values, INFLUXDB_PREDICTIONS_BUCKET)
+    
+    # Fazer previsões para os próximos 60 dias
+    future_predictions = predict_future(model, df['price'].values, scaler, seq_length, days=60)
+    future_timestamps = [df['timestamp'].iloc[-1] + timedelta(days=i) for i in range(1, 61)]
+    
+    future_prediction_df = pd.DataFrame({'timestamp': future_timestamps, 'predicted_price': future_predictions})
+    
+    # Inserir previsões futuras no InfluxDB
+    insert_predictions_to_influxdb(future_prediction_df['predicted_price'].values, future_prediction_df['timestamp'].values, INFLUXDB_PREDICTIONS_BUCKET)
     
     print("Dados históricos e previsões inseridos no InfluxDB com sucesso!")
 
